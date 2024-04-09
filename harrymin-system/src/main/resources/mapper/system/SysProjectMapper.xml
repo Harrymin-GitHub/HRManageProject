@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harrymin.system.mapper.SysProjectMapper">
+
+    <resultMap type="SysProject" id="SysProjectResult">
+        <id property="projectId" column="project_id"/>
+        <id property="deptId" column="dept_id"/>
+        <result property="projectCode" column="project_code"/>
+        <result property="projectShortName" column="project_shortName"/>
+        <result property="projectWholeName" column="project_wholeName"/>
+        <result property="projectCustomName" column="project_customName"/>
+        <result property="projectApplyDept" column="project_applyDept"/>
+        <result property="projectTakeDept" column="project_takeDept"/>
+        <result property="projectStatus" column="project_status"/>
+        <result property="projectApplyDate" column="project_applyDate"/>
+        <result property="projectStartPlan" column="project_startPlan"/>
+        <result property="projectEndPlan" column="project_endPlan"/>
+        <result property="projectStartDate" column="project_startDate"/>
+        <result property="projectEndDate" column="project_endDate"/>
+        <result property="projectIsDeleted" column="project_isDeleted"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <association property="dept" javaType="SysDept" resultMap="deptResult"/>
+    </resultMap>
+
+    <resultMap id="deptResult" type="SysDept">
+        <id property="deptId" column="dept_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="leader" column="leader"/>
+        <result property="status" column="dept_status"/>
+    </resultMap>
+
+    <sql id="selectProjectVo">
+        select p.project_id,
+               p.dept_id,
+               p.project_code,
+               p.project_shortName,
+               p.project_wholeName,
+               p.project_customName,
+               p.project_applyDept,
+               p.project_takeDept,
+               p.project_status,
+               p.project_applyDate,
+               p.project_startPlan,
+               p.project_endPlan,
+               p.project_startDate,
+               p.project_endDate,
+               d.dept_id,
+               d.parent_id,
+               d.ancestors,
+               d.dept_name,
+               d.order_num,
+               d.leader,
+               d.status as dept_status
+        from sys_project p
+                 left join sys_dept d on p.dept_id = d.dept_id
+    </sql>
+
+    <select id="selectProjectList" parameterType="SysProject" resultMap="SysProjectResult">
+        select
+        p.project_id,
+        p.dept_id,
+        p.project_code,
+        p.project_shortName,
+        p.project_wholeName,
+        p.project_customName,
+        p.project_applyDept,
+        p.project_takeDept,
+        p.project_status,
+        p.project_applyDate,
+        p.project_startPlan,
+        p.project_endPlan,
+        p.project_startDate,
+        p.project_endDate
+        from sys_project p
+        left join sys_dept d on p.dept_id = d.dept_id
+        where
+        1 = 1
+        and project_isDeleted = 0
+        <if test="project.projectCode != null and project.projectCode != ''">
+            and p.project_code = #{project.projectCode}
+        </if>
+        <if test="project.projectWholeName != null and project.projectWholeName != ''">
+            and p.project_wholeName = like concat('%', #{project.projectWholeName}, '%')
+        </if>
+        <if test="project.params.beginTime != null and project.params.beginTime != ''">
+            and date_format(p.project_startDate, '%y%m%d') &gt;= date_format(#{params.beginTime},'%y%m%d')
+        </if>
+        <if test="project.params.endTime != null and project.params.endTime != ''">
+            and date_format(p.project_endDate,'%y%m%d') &lt;= date_format(#{params.endTime},'%y%m%d')
+        </if>
+        <if test="project.projectStatus != null and project.projectStatus != ''">
+            and p.project_status = #{project.projectStatus}
+        </if>
+        <if test="project.deptId != null and project.deptId != 0">
+            AND (p.dept_id = #{project.deptId} OR p.dept_id IN ( SELECT dept_id FROM sys_dept WHERE
+            find_in_set(#{project.deptId}, ancestors) ))
+        </if>
+    </select>
+
+    <select id="selectProjectById" parameterType="Long" resultMap="SysProjectResult">
+        <include refid="selectProjectVo"/>
+        where p.project_id = #{projectId}
+    </select>
+
+    <select id="checkProjectCodeUnique" parameterType="String" resultMap="SysProjectResult">
+        select p.project_id,
+               p.project_code
+        from sys_project p
+        where project_code = #{projectCode}
+    </select>
+
+    <select id="selectProjectByProjectCode" parameterType="String" resultMap="SysProjectResult">
+        <include refid="selectProjectVo"/>
+        where p.project_code = #{projectCode} and p.project_isDeleted = '0'
+    </select>
+
+    <select id="selectApplyDeptNameById" parameterType="Long" resultType="java.lang.String">
+        select d.dept_name
+        from sys_dept d
+        where d.dept_id = #{projectApplyDept}
+    </select>
+
+    <select id="selectTakeDeptNameById" parameterType="Long" resultType="java.lang.String">
+        select d.dept_name
+        from sys_dept d
+        where d.dept_id = #{projectTakeDept}
+    </select>
+
+    <insert id="insertProject" parameterType="SysProject" useGeneratedKeys="true" keyProperty="projectId">
+        insert into sys_project(
+        <if test="project.projectId != null and project.projectId != 0">project_id,</if>
+        <if test="project.projectCode != null and project.projectCode != ''">project_code,</if>
+        <if test="project.deptId != null and project.deptId != 0">dept_id,</if>
+        <if test="project.projectShortName != null and project.projectShortName != ''">project_shortName,</if>
+        <if test="project.projectWholeName != null and project.projectWholeName != ''">project_wholeName,</if>
+        <if test="project.projectCustomName != null and project.projectCustomName != ''">project_customName,</if>
+        <if test="project.projectApplyDept != null and project.projectApplyDept != 0">project_applyDept,</if>
+        <if test="project.projectTakeDept != null and project.projectTakeDept != 0">project_takeDept,</if>
+        <if test="project.projectStatus != null and project.projectStatus != ''">project_status,</if>
+        <if test="project.projectApplyDate != null and project.projectApplyDate != ''">project_applyDate,</if>
+        <if test="project.projectStartPlan != null and project.projectStartPlan != ''">project_startPlan,</if>
+        <if test="project.projectEndPlan != null and project.projectEndPlan != ''">project_endPlan,</if>
+        <if test="project.projectStartDate != null and project.projectStartDate != ''">project_startDate,</if>
+        <if test="project.projectEndDate != null and project.projectEndDate != ''">project_endDate,</if>
+        <if test="project.createBy != null and project.createBy != ''">project_createdUser,</if>
+        project_createdTime
+        values(
+        <if test="project.projectId != null and project.projectId != 0">#{project.projectId},</if>
+        <if test="project.projectCode != null and project.projectCode != ''">#{project.projectCode},</if>
+        <if test="project.deptId != null and project.deptId != 0">#{project.projectCode},</if>
+        <if test="project.projectShortName != null and project.projectShortName != ''">#{project.projectShortName},</if>
+        <if test="project.projectWholeName != null and project.projectWholeName != ''">#{project.projectWholeName},</if>
+        <if test="project.projectCustomName != null and project.projectCustomName != ''">#{project.projectCustomName},
+        </if>
+        <if test="project.projectApplyDept != null and project.projectApplyDept != 0">#{project.projectApplyDept},</if>
+        <if test="project.projectTakeDept != null and project.projectTakeDept != 0">#{project.projectTakeDept},</if>
+        <if test="project.projectStatus != null and project.projectStatus != ''">#{project.projectStatus},</if>
+        <if test="project.projectApplyDate != null and project.projectApplyDate != ''">#{project.projectApplyDate},</if>
+        <if test="project.projectStartPlan != null and project.projectStartPlan != ''">#{project.projectStartPlan},</if>
+        <if test="project.projectEndPlan != null and project.projectEndPlan != ''">#{project.projectEndPlan},</if>
+        <if test="project.projectStartDate != null and project.projectStartDate != ''">#{project.projectStartDate},</if>
+        <if test="project.projectEndDate != null and project.projectEndDate != ''">#{project.projectEndDate},</if>
+        <if test="project.createBy != null and project.createBy != ''">#{project.createBy},</if>
+        sysdate()
+        )
+    </insert>
+
+    <update id="updateProject" parameterType="SysProject">
+        update sys_project
+        <set>
+            <if test="project.projectCode != null and project.projectCode != ''">
+                project_code = #{project.projectCode},
+            </if>
+            <if test="project.deptId != null and project.deptId != 0">
+                dept_id = #{project.deptId},
+            </if>
+            <if test="project.projectShortName != null and project.projectShortName != ''">
+                project_shortName = #{project.projectShortName},
+            </if>
+            <if test="project.projectWholeName != null and project.projectWholeName != ''">
+                project_wholeName = #{project.projectWholeName},
+            </if>
+            <if test="project.projectCustomName != null and project.projectCustomName != ''">
+                project_customName = #{project.projectCustomName},
+            </if>
+            <if test="project.projectApplyDept != null and project.projectApplyDept != 0">
+                project_applyDept = #{project.projectApplyDept},
+            </if>
+            <if test="project.projectTakeDept != null and project.projectTakeDept != 0">
+                project_takeDept = #{project.projectTakeDept},
+            </if>
+            <if test="project.projectStatus != null and project.projectStatus != ''">
+                project_status = #{project.projectStatus},
+            </if>
+            <if test="project.projectApplyDate != null and project.projectApplyDate != ''">
+                project_applyDate = #project.{projectApplyDate},
+            </if>
+            <if test="project.projectStartPlan != null and project.projectStartPlan != ''">
+                project_startPlan = #{project.projectStartPlan},
+            </if>
+            <if test="project.projectEndPlan != null and project.projectEndPlan != ''">
+                project_endPlan = #{project.projectEndPlan},
+            </if>
+            <if test="project.projectStartDate != null and project.projectStartDate != ''">
+                project_startDate = #{project.projectStartDate},
+            </if>
+            <if test="project.projectEndDate != null and project.projectEndDate != ''">
+                project_endDate = #{project.projectEndDate},
+            </if>
+            <if test="project.updateBy != null and project.updateBy != ''">
+                project_updatedUser = #{project.updateBy},
+            </if>
+            project_updatedTime = sysdate()
+        </set>
+        where project_id = #{project.projectId}
+    </update>
+
+    <delete id="deleteProjectByIds" parameterType="Long">
+        update sys_project set project_isDeleted = '1' where project_id in
+        <foreach collection="array" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+
+</mapper>
