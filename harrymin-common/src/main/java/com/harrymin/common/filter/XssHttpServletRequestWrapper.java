@@ -1,17 +1,17 @@
 package com.harrymin.common.filter;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import com.harrymin.common.utils.StringUtils;
+import com.harrymin.common.utils.html.EscapeUtil;
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-
-import org.apache.commons.io.IOUtils;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import com.harrymin.common.utils.StringUtils;
-import com.harrymin.common.utils.html.EscapeUtil;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * XSS过滤处理

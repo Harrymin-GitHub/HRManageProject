@@ -1,9 +1,9 @@
 package com.harrymin.common.utils.uuid;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.harrymin.common.utils.DateUtils;
 import com.harrymin.common.utils.StringUtils;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 序列生成类

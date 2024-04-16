@@ -1,11 +1,11 @@
 package com.harrymin.common.utils.ip;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import javax.servlet.http.HttpServletRequest;
-
 import com.harrymin.common.utils.ServletUtils;
 import com.harrymin.common.utils.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * 获取IP方法
