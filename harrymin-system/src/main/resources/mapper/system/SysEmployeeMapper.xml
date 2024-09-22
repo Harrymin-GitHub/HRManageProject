@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.harrymin.system.mapper.SysEmployeeMapper">
+
+    <resultMap type="SysEmployee" id="SysEmployeeResult">
+        <id property="employeeId" column="emp_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="attendanceId" column="attendance_id"/>
+        <result property="employeeCode" column="emp_code"/>
+        <result property="employeeStatus" column="emp_status"/>
+        <result property="employeeDuty" column="emp_duty"/>
+        <result property="employeeName" column="emp_name"/>
+        <result property="employeeSurname" column="emp_surname"/>
+        <result property="employeeLastname" column="emp_lastname"/>
+        <result property="employeeBirthday" column="emp_birthday"/>
+        <result property="employeeNativePlace" column="emp_native_place"/>
+        <result property="employeeResidence" column="emp_residence"/>
+        <result property="employeeAddress" column="emp_address"/>
+        <result property="employeeIDCard" column="emp_idcard"/>
+        <result property="employeeSchool" column="emp_school"/>
+        <result property="employeeGraduationDate" column="emp_graduate_date"/>
+        <result property="employeeEducation" column="emp_education"/>
+        <result property="employeeMajor" column="emp_major"/>
+        <result property="employeeIsMarried" column="emp_ismarried"/>
+        <result property="employeeJoinedDate" column="emp_joined_date"/>
+        <result property="employeeContactYears" column="emp_contact_years"/>
+        <result property="employeeSalary" column="emp_salary"/>
+        <result property="employeeIsProjected" column="emp_isprojected"/>
+        <result property="employeeJoinProjectDate" column="emp_join_project_date"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectEmployeeVo">
+        select e.emp_id, e.user_id, e.dept_id, e.attendance_id,
+               e.emp_code, e.emp_status, e.emp_duty, e.emp_name,
+               e.emp_surname, e.emp_lastname, e.emp_birthday, e.emp_native_place,
+               e.emp_residence, e.emp_address, e.emp_idcard, e.emp_school,
+               e.emp_graduate_date, e.emp_education, e.emp_major, e.emp_ismarried,
+               e.emp_joined_date, e.emp_contact_years, e.emp_salary, e.emp_isprojected,
+               e.emp_join_project_date, e.create_by, e.create_time, e.update_by,
+               e.update_time, e.remark, e.del_flag,
+               d.dept_id, d.parent_id, d.ancestors, d.dept_name,
+               d.order_num, d.leader,
+               d.status as dept_status
+        from sys_employee e
+        left join sys_dept d on e.dept_id = d.dept_id
+    </sql>
+
+    <select id="selectEmployeeList" parameterType="SysEmployee" resultMap="SysEmployeeResult">
+        select e.emp_id, e.user_id, e.attendance_id, e.emp_code,
+        e.emp_status, e.emp_duty, e.emp_name, e.emp_surname, e.emp_lastname,
+        e.emp_birthday, e.emp_native_place, e.emp_residence, e.emp_address,
+        e.emp_idcard, e.emp_school, e.emp_graduate_date, e.emp_education,
+        e.emp_major, e.emp_ismarried, e.emp_joined_date, e.emp_contact_years,
+        e.emp_salary, e.emp_isprojected, e.emp_join_project_date, d.dept_name, d.leader
+        from sys_employee e
+        left join sys_dept d on e.dept_id = d.dept_id
+        where e.del_flag = '0'
+    </select>
+
+</mapper> 
